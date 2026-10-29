@@ -108,6 +108,8 @@ Capture is refused while the order is still `CREATED`. A refund uses the capture
 
 Counter pickup. No shipping and no tax.
 
+Shelf cards and the cart show a thumbnail from `image` on each catalog item (`public/catalog/`). Those files are local, so the counter still renders photos when PayPal credentials are absent. Sources and the Unsplash License are listed under [Catalog images](#catalog-images).
+
 ## Smoke test
 
 `npm run smoke` creates one sandbox order through the PayPal Agent Toolkit. It does not call a model and does not read `OPENAI_API_KEY`. It uses `PAYPAL_CLIENT_ID`, `PAYPAL_CLIENT_SECRET`, and `PAYPAL_ENV` from the process environment. Values already exported in the shell win. `.env.local` is only a fallback for variables that are unset.
@@ -175,6 +177,20 @@ No other payment processor is used. There is no mock PayPal mode: without sandbo
 - `scripts/smoke-order.ts` — sandbox order-create smoke test
 - `DEMO.md` — two to three minute recording script
 - `SUBMISSION_DRAFT.md` — Devpost text, not submitted
+
+## Catalog images
+
+Each shelf item has an `image` path. The files under `public/catalog/` are 900×900 crops downloaded from Unsplash and committed so the storefront does not hotlink `images.unsplash.com`. Use is under the [Unsplash License](https://unsplash.com/license) (free, including commercial use; attribution is not required). Photographers are listed anyway. A mark visible in a stock photo is the photographer’s subject, not a Northline product.
+
+| File | Shelf item | Photographer | Unsplash photo |
+| --- | --- | --- | --- |
+| `public/catalog/trail-tin-mug.jpg` | Trail Tin Mug | Vanesa Giaconi | [crpDt5YdodU](https://unsplash.com/photos/crpDt5YdodU) |
+| `public/catalog/field-notebook.jpg` | Field Notebook | Scott Graham | [EPppwcVTZEo](https://unsplash.com/photos/EPppwcVTZEo) |
+| `public/catalog/wool-watch-cap.jpg` | Wool Watch Cap | Nynne Schrøder | [Sied4fp3-Dc](https://unsplash.com/photos/Sied4fp3-Dc) |
+| `public/catalog/compact-lantern.jpg` | Compact Lantern | Matthew Brodeur | [slAuv1NzyYM](https://unsplash.com/photos/slAuv1NzyYM) |
+| `public/catalog/repair-kit.jpg` | Tenacious Repair Kit | Debby Hudson | [RjtcHgPbYUk](https://unsplash.com/photos/RjtcHgPbYUk) |
+
+Devpost gallery stills (cover and screenshots) live in `docs/devpost/`. See [docs/devpost/ASSETS.md](docs/devpost/ASSETS.md). Uploading them to Devpost is a manual edit. This repo does not submit Devpost.
 
 ## License
 

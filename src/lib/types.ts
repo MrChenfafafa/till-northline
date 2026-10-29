@@ -19,6 +19,7 @@ export type CartLine = {
   unitPrice: string;
   lineTotal: string;
   blurb: string;
+  image?: string;
 };
 
 export type CartQuote = {

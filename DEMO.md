@@ -11,7 +11,7 @@ Before you hit record:
 
 ## 0:00 — The counter
 
-Show the Northline page: shelf on the left, chat in the middle, order rail on the right. Say:
+Show the Northline page: shelf on the left (item photos), chat in the middle, order rail on the right. Say:
 
 > This is Till, a commerce copilot for a five-item shop. It does not stop at a recommendation. It prices a cart and pays in the PayPal sandbox with the PayPal Agent Toolkit.
 
