@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowUp,
   Backpack,
@@ -68,7 +68,6 @@ export function Copilot() {
   const [error, setError] = useState<string | null>(null);
   const [ledger, setLedger] = useState<Ledger>(starterLedger);
   const [panel, setPanel] = useState<"chat" | "shelf" | "order">("chat");
-  const scroller = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -84,10 +83,6 @@ export function Copilot() {
       cancelled = true;
     };
   }, []);
-
-  useEffect(() => {
-    scroller.current?.scrollTo({ top: scroller.current.scrollHeight, behavior: "smooth" });
-  }, [turns, busy]);
 
   async function send(text?: string) {
     const content = (text ?? draft).trim();
@@ -226,7 +221,7 @@ export function Copilot() {
         </section>
 
         <section className={`${panel === "chat" ? "flex" : "hidden"} min-h-[70dvh] flex-col lg:flex lg:min-h-[calc(100dvh-9rem)]`}>
-          <div ref={scroller} className="flex-1 space-y-4 overflow-y-auto pr-1">
+          <div className="space-y-4 pr-1">
             {turns.length === 0 ? (
               <div className="border-border bg-card/80 rounded-xl border px-5 py-6">
                 <h2 className="font-heading text-2xl tracking-tight">What do you need from the counter?</h2>
