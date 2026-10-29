@@ -1,12 +1,23 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ArrowUp, ExternalLink } from "lucide-react";
+import {
+  ArrowUp,
+  Backpack,
+  Compass,
+  ExternalLink,
+  MessageSquare,
+  Receipt,
+  ShieldCheck,
+  type LucideIcon,
+} from "lucide-react";
+import { PaymentStatusIcon, RefundStatusIcon } from "@/components/order-status";
+import { ProductThumb } from "@/components/product-thumb";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { CATALOG, formatUsd } from "@/lib/catalog";
+import { CATALOG, formatUsd, imageForSku } from "@/lib/catalog";
 import { summarizeTool } from "@/lib/ledger";
 import type { HealthStatus, Ledger, ToolTrace } from "@/lib/types";
 
@@ -42,6 +53,12 @@ function statusLabel(status?: string) {
   if (status === "COMPLETED") return "Captured";
   return status;
 }
+
+const PANELS: Array<{ id: "chat" | "shelf" | "order"; label: string; icon: LucideIcon }> = [
+  { id: "chat", label: "Chat", icon: MessageSquare },
+  { id: "shelf", label: "Shelf", icon: Backpack },
+  { id: "order", label: "Order", icon: Receipt },
+];
 
 export function Copilot() {
   const [health, setHealth] = useState<HealthStatus | null>(null);
@@ -126,19 +143,29 @@ export function Copilot() {
     <div className="min-h-dvh">
       <div className="h-1 bg-[oklch(0.64_0.13_48)]" />
       <header className="border-b border-border/80 bg-card/70 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-end justify-between gap-4 px-4 py-4 sm:px-6">
-          <div>
-            <p className="font-heading text-3xl tracking-tight">Northline</p>
-            <p className="text-sm text-muted-foreground">Till · agentic commerce copilot</p>
+        <div className="mx-auto flex max-w-7xl items-end justify-between gap-4 px-4 py-4 sm:px-6">
+          <div className="flex items-center gap-3">
+            <span className="bg-primary text-primary-foreground flex size-10 items-center justify-center rounded-lg">
+              <Compass className="size-5" aria-hidden />
+            </span>
+            <div>
+              <p className="font-heading text-3xl tracking-tight">Northline</p>
+              <p className="text-sm text-muted-foreground">Till · agentic commerce copilot</p>
+            </div>
           </div>
           <div className="flex flex-wrap justify-end gap-2">
-            <Badge variant="outline">PayPal sandbox</Badge>
-            <Badge variant="secondary">{health?.paypal.toolPath === "mcp" ? "MCP tools" : "Agent Toolkit"}</Badge>
+            <Badge variant="outline">
+              <ShieldCheck data-icon="inline-start" aria-hidden />
+              PayPal sandbox
+            </Badge>
+            <Badge variant="secondary">
+              {health?.paypal.toolPath === "mcp" ? "MCP tools" : "Agent Toolkit"}
+            </Badge>
           </div>
         </div>
       </header>
 
-      <div className="mx-auto max-w-6xl px-4 py-3 sm:px-6">
+      <div className="mx-auto max-w-7xl px-4 py-3 sm:px-6">
         {health && !health.paypal.configured ? (
           <p className="mb-3 rounded-lg border border-border bg-card px-3 py-2 text-sm text-muted-foreground">
             PayPal sandbox credentials are not set. Add <code>PAYPAL_CLIENT_ID</code>,{" "}
@@ -159,34 +186,33 @@ export function Copilot() {
         ) : null}
       </div>
 
-      <div className="mx-auto flex max-w-6xl gap-2 px-4 pb-3 sm:px-6 lg:hidden">
-        {(
-          [
-            ["chat", "Chat"],
-            ["shelf", "Shelf"],
-            ["order", "Order"],
-          ] as const
-        ).map(([id, label]) => (
+      <div className="mx-auto flex max-w-7xl gap-2 px-4 pb-3 sm:px-6 lg:hidden">
+        {PANELS.map(({ id, label, icon: Icon }) => (
           <Button
             key={id}
             type="button"
             variant={panel === id ? "default" : "outline"}
             onClick={() => setPanel(id)}
           >
+            <Icon aria-hidden data-icon="inline-start" />
             {label}
           </Button>
         ))}
       </div>
 
-      <main className="mx-auto grid max-w-6xl gap-4 px-4 pb-8 sm:px-6 lg:grid-cols-[260px_minmax(0,1fr)_300px] lg:items-start">
+      <main className="mx-auto grid max-w-7xl gap-4 px-4 pb-8 sm:px-6 lg:grid-cols-[340px_minmax(0,1fr)_320px] lg:items-start">
         <section className={`${panel === "shelf" ? "block" : "hidden"} lg:block`}>
-          <h2 className="font-heading mb-3 text-xl">The shelf</h2>
+          <h2 className="font-heading mb-3 flex items-center gap-2 text-xl">
+            <Backpack className="size-5" aria-hidden />
+            The shelf
+          </h2>
           <ul className="space-y-2">
             {CATALOG.map((product) => (
               <li key={product.sku}>
                 <Card className={cartSkus.has(product.sku) ? "ring-primary/40" : undefined}>
-                  <CardContent className="flex items-start justify-between gap-3">
-                    <div>
+                  <CardContent className="flex items-center gap-3">
+                    <ProductThumb src={product.image} alt="" size="shelf" />
+                    <div className="min-w-0 flex-1">
                       <p className="font-medium">{product.name}</p>
                       <p className="text-muted-foreground text-xs">{product.blurb}</p>
                       <p className="text-muted-foreground mt-1 font-mono text-[11px]">{product.sku}</p>
@@ -295,21 +321,28 @@ export function Copilot() {
         </section>
 
         <aside className={`${panel === "order" ? "block" : "hidden"} lg:block`}>
-          <h2 className="font-heading mb-3 text-xl">This order</h2>
+          <h2 className="font-heading mb-3 flex items-center gap-2 text-xl">
+            <Receipt className="size-5" aria-hidden />
+            This order
+          </h2>
           <Card>
             <CardContent className="space-y-4">
               {ledger.cart ? (
                 <div>
                   <p className="text-xs tracking-[0.14em] text-muted-foreground uppercase">Cart</p>
-                  <ul className="mt-2 space-y-1 text-sm">
-                    {ledger.cart.lines.map((line) => (
-                      <li key={line.sku} className="flex justify-between gap-3">
-                        <span>
-                          {line.quantity} × {line.name}
-                        </span>
-                        <span>${line.lineTotal}</span>
-                      </li>
-                    ))}
+                  <ul className="mt-2 space-y-2 text-sm">
+                    {ledger.cart.lines.map((line) => {
+                      const image = line.image || imageForSku(line.sku);
+                      return (
+                        <li key={line.sku} className="flex items-center gap-2">
+                          {image ? <ProductThumb src={image} alt="" size="cart" /> : null}
+                          <span className="min-w-0 flex-1">
+                            {line.quantity} × {line.name}
+                          </span>
+                          <span>${line.lineTotal}</span>
+                        </li>
+                      );
+                    })}
                   </ul>
                   <p className="mt-2 flex justify-between font-medium">
                     <span>Total</span>
@@ -324,9 +357,12 @@ export function Copilot() {
                 <p className="text-xs tracking-[0.14em] text-muted-foreground uppercase">PayPal</p>
                 {order ? (
                   <dl className="mt-2 space-y-1 text-sm">
-                    <div className="flex justify-between gap-3">
+                    <div className="flex items-center justify-between gap-3">
                       <dt className="text-muted-foreground">Status</dt>
-                      <dd>{statusLabel(order.status)}</dd>
+                      <dd className="flex items-center gap-1.5 text-right">
+                        <PaymentStatusIcon status={order.status} />
+                        {statusLabel(order.status)}
+                      </dd>
                     </div>
                     <div>
                       <dt className="text-muted-foreground">Order</dt>
@@ -340,7 +376,10 @@ export function Copilot() {
                     ) : null}
                     {order.refundId ? (
                       <div>
-                        <dt className="text-muted-foreground">Refund</dt>
+                        <dt className="text-muted-foreground flex items-center gap-1.5">
+                          <RefundStatusIcon />
+                          Refund
+                        </dt>
                         <dd className="font-mono text-xs break-all">
                           {order.refundId}
                           {order.refundStatus ? ` · ${order.refundStatus}` : ""}
@@ -357,7 +396,10 @@ export function Copilot() {
                     ) : null}
                   </dl>
                 ) : (
-                  <p className="mt-2 text-sm text-muted-foreground">No sandbox order yet.</p>
+                  <p className="mt-2 flex items-center gap-1.5 text-sm text-muted-foreground">
+                    <PaymentStatusIcon />
+                    No sandbox order yet.
+                  </p>
                 )}
                 {order?.approvalUrl ? (
                   <a

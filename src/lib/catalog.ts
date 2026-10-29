@@ -6,6 +6,7 @@ export type Product = {
   priceCents: number;
   blurb: string;
   detail: string;
+  image: string;
 };
 
 export const CATALOG: Product[] = [
@@ -15,6 +16,7 @@ export const CATALOG: Product[] = [
     priceCents: 2400,
     blurb: "Speckled enamel, 12 oz",
     detail: "Speckled enamel mug that nests in a day bag. Hand wash.",
+    image: "/catalog/trail-tin-mug.jpg",
   },
   {
     sku: "NL-NB-02",
@@ -22,6 +24,7 @@ export const CATALOG: Product[] = [
     priceCents: 1200,
     blurb: "48 waterproof pages",
     detail: "Pocket notebook with waterproof pages and a pencil loop.",
+    image: "/catalog/field-notebook.jpg",
   },
   {
     sku: "NL-CAP-03",
@@ -29,6 +32,7 @@ export const CATALOG: Product[] = [
     priceCents: 2800,
     blurb: "Charcoal merino",
     detail: "Light merino watch cap. Charcoal, one size.",
+    image: "/catalog/wool-watch-cap.jpg",
   },
   {
     sku: "NL-LAN-04",
@@ -36,6 +40,7 @@ export const CATALOG: Product[] = [
     priceCents: 3600,
     blurb: "180 lumens, USB-C",
     detail: "Compact lantern, 180 lumens, recharges on USB-C.",
+    image: "/catalog/compact-lantern.jpg",
   },
   {
     sku: "NL-KIT-05",
@@ -43,11 +48,16 @@ export const CATALOG: Product[] = [
     priceCents: 1800,
     blurb: "Thread, patches, tape",
     detail: "Needle, thread, fabric patches, and a short roll of repair tape.",
+    image: "/catalog/repair-kit.jpg",
   },
 ];
 
 export function formatUsd(cents: number): string {
   return (cents / 100).toFixed(2);
+}
+
+export function imageForSku(sku: string): string | undefined {
+  return CATALOG.find((product) => product.sku === sku)?.image;
 }
 
 export function findProduct(query: string | undefined): Product | undefined {
@@ -109,6 +119,7 @@ export function quoteCart(
       unitPrice: formatUsd(product.priceCents),
       lineTotal: formatUsd(lineCents),
       blurb: product.blurb,
+      image: product.image,
     };
   });
 
@@ -149,6 +160,7 @@ export function listCatalog(maxPrice?: number) {
     currency: "USD" as const,
     blurb: product.blurb,
     detail: product.detail,
+    image: product.image,
   }));
   return {
     shop: "Northline Outfitters",

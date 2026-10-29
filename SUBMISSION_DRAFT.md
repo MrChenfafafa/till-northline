@@ -55,6 +55,10 @@ Next.js, TypeScript, Vercel AI SDK, PayPal Agent Toolkit, PayPal Orders v2, PayP
 
 Vercel AI SDK 4 (tool calling / agent loop). Default model label: gpt-4o-mini via OPENAI_API_KEY, configurable with OPENAI_MODEL and OPENAI_BASE_URL for any OpenAI-compatible tool-calling endpoint (including a third-party relay). When OPENAI_BASE_URL is a relay: disclose that chat traffic goes through the relay and the actual model is whatever the relay returns. PayPal Agent Toolkit (@paypal/agent-toolkit) for sandbox create_order, get_order, pay_order, and refunds. Optional PayPal MCP server (@paypal/agent-toolkit/mcp, the same payment tools as @paypal/mcp). Developed with Cursor Cloud Agent / Grok Bot.
 
+## Gallery files for a human to upload
+
+Devpost gallery re-upload stays human-gated. Do not submit these from automation. Paths and what each still is for are in [docs/devpost/ASSETS.md](docs/devpost/ASSETS.md).
+
 ## Links to fill in when the human submits
 
 - GitHub repository: (public repo with the MIT license visible in About)
