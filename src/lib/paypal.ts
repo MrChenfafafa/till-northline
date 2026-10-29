@@ -1,7 +1,7 @@
 import { PayPalAgentToolkit } from "@paypal/agent-toolkit/ai-sdk";
 import axios from "axios";
 import type { ToolExecutionOptions } from "ai";
-import { findProduct } from "@/lib/catalog";
+import { quoteCart } from "@/lib/catalog";
 import { isCheckoutConfirmation, lastUserText } from "@/lib/confirm";
 import { assertSandbox, checkoutUrls, paypalCredentials } from "@/lib/env";
 import { findApprovalUrl, parseResult, safeApprovalUrl } from "@/lib/ledger";
@@ -52,15 +52,6 @@ export function paypalError(error: unknown): string {
   return JSON.stringify({ error: "Unknown PayPal error" });
 }
 
-type OrderItem = {
-  name?: string;
-  quantity?: number;
-  description?: string;
-  itemCost?: number;
-  taxPercent?: number;
-  itemTotal?: number;
-};
-
 /**
  * Keep PayPal order lines locked to the Northline shelf, and refuse to open
  * an order until the buyer has confirmed the cart in the latest message.
@@ -78,39 +69,24 @@ export function guardCreateOrder(
           "The buyer has not confirmed this cart. Show the line items and total, then wait for an explicit yes before create_order.",
       });
     }
-    const items = Array.isArray(args.items) ? (args.items as OrderItem[]) : [];
+    const items = Array.isArray(args.items) ? args.items : [];
     if (!items.length) {
       return JSON.stringify({ error: "create_order needs items from prepare_paypal_order." });
     }
-    const fixedItems = [];
-    for (const item of items) {
-      const product = findProduct(item.name);
-      if (!product) {
-        return JSON.stringify({
-          error: `Refusing create_order for unknown item "${item.name ?? ""}". Call prepare_paypal_order and pass its items through.`,
-        });
-      }
-      const quantity = item.quantity ?? 1;
-      if (!Number.isInteger(quantity) || quantity < 1 || quantity > 10) {
-        return JSON.stringify({ error: `Quantity for ${product.name} must be a whole number from 1 to 10.` });
-      }
-      fixedItems.push({
-        name: product.name,
-        quantity,
-        description: `${product.sku}. ${product.detail}`.slice(0, 127),
-        itemCost: product.priceCents / 100,
-        taxPercent: 0,
-        itemTotal: (product.priceCents * quantity) / 100,
-      });
-    }
+    const quote = quoteCart(
+      items.map((item) => {
+        const record = item && typeof item === "object" ? (item as Record<string, unknown>) : {};
+        return {
+          sku: typeof record.sku === "string" ? record.sku : undefined,
+          name: typeof record.name === "string" ? record.name : undefined,
+          quantity: typeof record.quantity === "number" ? record.quantity : Number.NaN,
+        };
+      }),
+      urls,
+    );
+    if ("error" in quote) return JSON.stringify(quote);
     const fixed = {
-      currencyCode: "USD",
-      items: fixedItems,
-      discount: 0,
-      shippingCost: 0,
-      returnUrl: urls.returnUrl,
-      cancelUrl: urls.cancelUrl,
-      shippingAddress: args.shippingAddress ?? null,
+      ...quote.create_order_arguments,
       notes: typeof args.notes === "string" ? args.notes : "Northline Outfitters counter order",
     };
     try {

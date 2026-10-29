@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { quoteCart } from "../src/lib/catalog";
 import { SandboxOnlyError, assertSandbox } from "../src/lib/env";
 import { createPaypalToolkit, guardCreateOrder } from "../src/lib/paypal";
 
@@ -70,10 +71,47 @@ describe("PayPal sandbox guard", () => {
         { toolCallId: "test", messages: [] },
       );
       assert.equal(called, false);
-      assert.match(String(unknown), /unknown item/i);
+      assert.match(String(unknown), /unknown shelf item/i);
     } finally {
       if (previous == null) delete process.env.PAYPAL_ENV;
       else process.env.PAYPAL_ENV = previous;
     }
+  });
+
+  it("quotes create_order from the catalog and omits shipping", async () => {
+    const origin = "http://127.0.0.1:41731";
+    const quote = quoteCart([{ name: "Trail Tin Mug", quantity: 2 }], {
+      returnUrl: `${origin}/checkout/return`,
+      cancelUrl: `${origin}/checkout/cancel`,
+    });
+    assert.ok(!("error" in quote));
+    if ("error" in quote) return;
+
+    let received: Record<string, unknown> | undefined;
+    const wrapped = guardCreateOrder(
+      async (args) => {
+        received = args as Record<string, unknown>;
+        return JSON.stringify({ id: "ORDER123" });
+      },
+      [{ role: "user", content: "Yes, check out with PayPal" }],
+      origin,
+    );
+    const result = await wrapped(
+      {
+        items: [{ name: "Trail Tin Mug", quantity: 2, itemCost: 1, description: "tampered price" }],
+        shippingAddress: { address_line_1: "1 Main" },
+      },
+      { toolCallId: "test", messages: [] },
+    );
+    assert.match(String(result), /ORDER123/);
+    assert.ok(received);
+    assert.equal("shippingAddress" in received, false);
+    assert.deepEqual(received.items, quote.create_order_arguments.items);
+    assert.equal(received.currencyCode, "USD");
+    assert.equal(received.discount, 0);
+    assert.equal(received.shippingCost, 0);
+    assert.equal(received.returnUrl, quote.create_order_arguments.returnUrl);
+    assert.equal(received.cancelUrl, quote.create_order_arguments.cancelUrl);
+    assert.equal((received.items as Array<{ itemCost: number }>)[0]?.itemCost, 24);
   });
 });
