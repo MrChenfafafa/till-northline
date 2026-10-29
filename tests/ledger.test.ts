@@ -21,6 +21,12 @@ describe("ledger", () => {
       safeApprovalUrl("https://www.sandbox.paypal.com/checkoutnow?token=ABC"),
       "https://www.sandbox.paypal.com/checkoutnow?token=ABC",
     );
+    assert.equal(
+      safeApprovalUrl("https://sandbox.paypal.com/checkoutnow?token=ABC"),
+      "https://sandbox.paypal.com/checkoutnow?token=ABC",
+    );
+    assert.equal(safeApprovalUrl("https://www.paypal.com/checkoutnow?token=ABC"), undefined);
+    assert.equal(safeApprovalUrl("https://paypal.com/checkoutnow?token=LIVE"), undefined);
     assert.equal(safeApprovalUrl("https://evil.example/checkoutnow"), undefined);
     assert.equal(safeApprovalUrl("javascript:alert(1)"), undefined);
   });

@@ -44,9 +44,7 @@ export function safeApprovalUrl(url: unknown): string | undefined {
     const parsed = new URL(url);
     const allowed =
       parsed.protocol === "https:" &&
-      (parsed.hostname === "www.sandbox.paypal.com" ||
-        parsed.hostname === "sandbox.paypal.com" ||
-        parsed.hostname === "www.paypal.com");
+      (parsed.hostname === "www.sandbox.paypal.com" || parsed.hostname === "sandbox.paypal.com");
     return allowed ? parsed.toString() : undefined;
   } catch {
     return undefined;

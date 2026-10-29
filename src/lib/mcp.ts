@@ -16,12 +16,15 @@ const PAYMENT_TOOLS = new Set([
 let mcpToolsPromise: Promise<Record<string, Tool>> | null = null;
 
 function childEnv(accessToken: string): Record<string, string> {
-  const env: Record<string, string> = {};
-  for (const [key, value] of Object.entries(process.env)) {
-    if (typeof value === "string") env[key] = value;
+  const env: Record<string, string> = {
+    PAYPAL_ACCESS_TOKEN: accessToken,
+    PAYPAL_ENVIRONMENT: "SANDBOX",
+  };
+  // Spawn replaces the environment; Node still consults PATH, HOME, and TMPDIR.
+  for (const key of ["PATH", "HOME", "TMPDIR"] as const) {
+    const value = process.env[key];
+    if (typeof value === "string" && value) env[key] = value;
   }
-  env.PAYPAL_ACCESS_TOKEN = accessToken;
-  env.PAYPAL_ENVIRONMENT = "SANDBOX";
   return env;
 }
 
