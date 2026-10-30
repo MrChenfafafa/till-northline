@@ -63,7 +63,11 @@ PAYPAL_CLIENT_SECRET=your_sandbox_client_secret
 PAYPAL_ENV=sandbox
 OPENAI_API_KEY=your_openai_api_key
 OPENAI_MODEL=gpt-4o-mini
+# Optional. Unset keeps the official OpenAI host; set this to send chat through a relay.
+# OPENAI_BASE_URL=https://api.openai.com/v1
 PAYPAL_TOOL_PATH=toolkit
+# Optional. Unset resolves PayPal return URLs from the request host.
+# APP_ORIGIN=https://your-public-origin.example
 ```
 
 If `OPENAI_BASE_URL` is set, requests go there with `OPENAI_API_KEY`. Example for an OpenAI-compatible host:
