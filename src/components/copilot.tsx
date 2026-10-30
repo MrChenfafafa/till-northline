@@ -158,9 +158,11 @@ export function Copilot() {
               <ShieldCheck data-icon="inline-start" aria-hidden />
               PayPal sandbox
             </Badge>
-            <Badge variant="secondary">
-              {health?.paypal.toolPath === "mcp" ? "MCP tools" : "Agent Toolkit"}
-            </Badge>
+            {health ? (
+              <Badge variant="secondary">
+                {health.paypal.toolPath === "mcp" ? "MCP tools" : "Agent Toolkit"}
+              </Badge>
+            ) : null}
           </div>
         </div>
       </header>
